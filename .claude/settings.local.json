@@ -6,7 +6,19 @@
       "Bash(npm view *)",
       "Bash(node -e \"const p = require\\('./node_modules/lightningcss/package.json'\\); console.log\\(p.version\\)\")",
       "Bash(node -e \"const p = require\\('./package.json'\\); console.log\\('nativewind:', p.dependencies.nativewind, 'tailwindcss:', p.dependencies.tailwindcss\\)\")",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(Get-ChildItem -Path \"d:\\\\Projects\\\\react native projects\\\\mbd_performance\" -Recurse -Directory)",
+      "Bash(Select-Object -First 50)",
+      "Bash(Format-List FullName)",
+      "PowerShell(Get-ChildItem -Path \"d:\\\\Projects\\\\react native projects\\\\mbd_performance\\\\app\" -Recurse | Select-Object FullName, @{Name='Type'; Expression={if\\($_.PSIsContainer\\){'DIR'}else{'FILE'}}} | Format-Table -AutoSize)",
+      "Bash(npx expo *)",
+      "Bash(node -e \"console.log\\(require\\('./node_modules/@clerk/expo/package.json'\\).version\\)\")",
+      "Bash(node -e \"const clerk = require\\('@clerk/expo'\\); console.log\\(Object.keys\\(clerk\\)\\)\")",
+      "Bash(dir \"d:\\\\Projects\\\\react native projects\\\\mbd_performance\\\\node_modules\\\\@clerk\\\\expo\\\\dist\")",
+      "Bash(node -e \"const pkg = require\\('./node_modules/@clerk/expo/package.json'\\); console.log\\(JSON.stringify\\({main: pkg.main, module: pkg.module, exports: Object.keys\\(pkg.exports || {}\\).slice\\(0,5\\), react_native: pkg['react-native']}, null, 2\\)\\)\")",
+      "Bash(node -e \"const pkg = require\\('./node_modules/@clerk/expo/package.json'\\); console.log\\(JSON.stringify\\(pkg.exports['.'], null, 2\\)\\)\")",
+      "Bash(node -e \"const pkg = require\\('./node_modules/@clerk/expo/package.json'\\); console.log\\(JSON.stringify\\(Object.keys\\(pkg.exports\\), null, 2\\)\\)\")",
+      "Bash(node -e \"const pkg = require\\('./node_modules/@clerk/expo/package.json'\\); console.log\\(JSON.stringify\\({main: pkg.main, 'react-native': pkg['react-native'], source: pkg.source, browser: pkg.browser, peerDependencies: pkg.peerDependencies}, null, 2\\)\\)\")"
     ]
   }
 }

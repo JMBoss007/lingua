@@ -1,4 +1,3 @@
-import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -15,6 +14,7 @@ interface Props {
   visible: boolean;
   onClose: () => void;
   email: string;
+  onVerify: (code: string) => Promise<void>;
   onResendCode: () => Promise<void>;
 }
 
@@ -22,10 +22,12 @@ export default function VerificationModal({
   visible,
   onClose,
   email,
+  onVerify,
   onResendCode,
 }: Props) {
-  const router = useRouter();
   const [code, setCode] = useState(["", "", "", "", "", ""]);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verifyError, setVerifyError] = useState<string | null>(null);
   const [isResending, setIsResending] = useState(false);
   const [resendError, setResendError] = useState<string | null>(null);
   const inputRefs = useRef<(TextInput | null)[]>([]);
@@ -33,6 +35,7 @@ export default function VerificationModal({
   useEffect(() => {
     if (visible) {
       setCode(["", "", "", "", "", ""]);
+      setVerifyError(null);
       setResendError(null);
       setTimeout(() => inputRefs.current[0]?.focus(), 100);
     }
@@ -49,16 +52,24 @@ export default function VerificationModal({
     }
 
     if (digit && newCode.every((d) => d !== "")) {
-      setTimeout(() => {
-        onClose();
-        router.replace("/");
-      }, 300);
+      const fullCode = newCode.join("");
+      setIsVerifying(true);
+      setVerifyError(null);
+      onVerify(fullCode)
+        .catch((err) => {
+          setVerifyError(
+            err instanceof Error ? err.message : "Invalid code. Please try again."
+          );
+          setCode(["", "", "", "", "", ""]);
+          setTimeout(() => inputRefs.current[0]?.focus(), 100);
+        })
+        .finally(() => setIsVerifying(false));
     }
   };
 
   const handleKeyPress = (
     e: { nativeEvent: { key: string } },
-    index: number,
+    index: number
   ) => {
     if (e.nativeEvent.key === "Backspace" && !code[index] && index > 0) {
       const newCode = [...code];
@@ -128,9 +139,16 @@ export default function VerificationModal({
                 style={[styles.codeBox, digit ? styles.codeBoxFilled : null]}
                 textAlign="center"
                 selectTextOnFocus
+                editable={!isVerifying}
               />
             ))}
           </View>
+
+          {verifyError && (
+            <Text className="body-sm text-red-500 mb-4 text-center">
+              {verifyError}
+            </Text>
+          )}
 
           {resendError && (
             <Text className="body-sm text-red-500 mb-4 text-center">
@@ -140,13 +158,13 @@ export default function VerificationModal({
 
           <TouchableOpacity
             onPress={handleResend}
-            disabled={isResending}
+            disabled={isResending || isVerifying}
             className="items-center"
           >
             <Text className="body-sm text-ink-secondary">
               Didn't receive it?{" "}
               <Text className="text-primary font-poppins-medium">
-                {isResending ? "Sending..." : "Resend"}
+                {isResending ? "Sending..." : isVerifying ? "Verifying..." : "Resend"}
               </Text>
             </Text>
           </TouchableOpacity>

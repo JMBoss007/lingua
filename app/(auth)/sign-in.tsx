@@ -9,15 +9,64 @@ import {
   StyleSheet,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useRouter, type Href } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useSignIn, useSSO } from "@clerk/expo";
 import { images } from "@/constants/images";
 import VerificationModal from "@/components/VerificationModal";
 
 export default function SignInScreen() {
   const router = useRouter();
+  const { signIn, errors, fetchStatus } = useSignIn();
+  const { startSSOFlow } = useSSO();
+
   const [email, setEmail] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+
+  const handleSignIn = async () => {
+    setFormError(null);
+    const { error } = await signIn.emailCode.sendCode({ emailAddress: email });
+    if (error) {
+      setFormError(error.longMessage ?? error.message);
+      return;
+    }
+    setShowModal(true);
+  };
+
+  const handleVerify = async (code: string) => {
+    const { error } = await signIn.emailCode.verifyCode({ code });
+    if (error) {
+      throw new Error(error.longMessage ?? error.message);
+    }
+    if (signIn.status === "complete") {
+      await signIn.finalize({
+        navigate: ({ session, decorateUrl }) => {
+          if (session?.currentTask) return;
+          const url = decorateUrl("/");
+          router.replace(url as Href);
+        },
+      });
+    }
+  };
+
+  const handleResend = async () => {
+    const { error } = await signIn.emailCode.sendCode({ emailAddress: email });
+    if (error) {
+      throw new Error(error.longMessage ?? error.message);
+    }
+  };
+
+  const handleSSOAuth = async (strategy: "oauth_google" | "oauth_facebook" | "oauth_apple") => {
+    setFormError(null);
+    const { createdSessionId, setActive } = await startSSOFlow({ strategy });
+    if (createdSessionId && setActive) {
+      await setActive({ session: createdSessionId });
+      router.replace("/");
+    }
+  };
+
+  const isLoading = fetchStatus === "fetching";
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#ffffff" }}>
@@ -67,15 +116,28 @@ export default function SignInScreen() {
             placeholderTextColor="#9ca3af"
           />
         </View>
+        {errors.fields.identifier && (
+          <Text className="body-sm text-red-500 -mt-5 mb-3 px-1">
+            {errors.fields.identifier.message}
+          </Text>
+        )}
+
+        {formError && (
+          <Text className="body-sm text-red-500 mb-4 text-center">
+            {formError}
+          </Text>
+        )}
 
         {/* Sign In button */}
         <TouchableOpacity
           className="bg-primary rounded-[20px] py-4 items-center mb-6"
           activeOpacity={0.85}
-          onPress={() => setShowModal(true)}
+          onPress={handleSignIn}
+          disabled={!email || isLoading}
+          style={(!email || isLoading) ? { opacity: 0.6 } : undefined}
         >
           <Text className="font-poppins-semibold text-[16px] leading-6 text-white">
-            Sign In
+            {isLoading ? "Sending code..." : "Sign In"}
           </Text>
         </TouchableOpacity>
 
@@ -91,8 +153,9 @@ export default function SignInScreen() {
         {/* Social buttons */}
         <View className="gap-3">
           <TouchableOpacity
-            className="flex-row items-center border border-border rounded-2xl py-[14px] px-6"
+            className="flex-row items-center border border-border rounded-2xl py-3.5 px-6"
             activeOpacity={0.7}
+            onPress={() => handleSSOAuth("oauth_google")}
           >
             <Ionicons name="logo-google" size={20} color="#EA4335" />
             <Text className="font-poppins-medium text-[15px] text-ink flex-1 text-center">
@@ -101,8 +164,9 @@ export default function SignInScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            className="flex-row items-center border border-border rounded-2xl py-[14px] px-6"
+            className="flex-row items-center border border-border rounded-2xl py-3.5 px-6"
             activeOpacity={0.7}
+            onPress={() => handleSSOAuth("oauth_facebook")}
           >
             <Ionicons name="logo-facebook" size={20} color="#1877F2" />
             <Text className="font-poppins-medium text-[15px] text-ink flex-1 text-center">
@@ -111,8 +175,9 @@ export default function SignInScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            className="flex-row items-center border border-border rounded-2xl py-[14px] px-6"
+            className="flex-row items-center border border-border rounded-2xl py-3.5 px-6"
             activeOpacity={0.7}
+            onPress={() => handleSSOAuth("oauth_apple")}
           >
             <Ionicons name="logo-apple" size={20} color="#001132" />
             <Text className="font-poppins-medium text-[15px] text-ink flex-1 text-center">
@@ -141,6 +206,8 @@ export default function SignInScreen() {
         visible={showModal}
         onClose={() => setShowModal(false)}
         email={email}
+        onVerify={handleVerify}
+        onResendCode={handleResend}
       />
     </SafeAreaView>
   );
