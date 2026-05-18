@@ -1,19 +1,19 @@
+import VerificationModal from "@/components/VerificationModal";
+import { images } from "@/constants/images";
+import { useSignUp, useSSO } from "@clerk/expo";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter, type Href } from "expo-router";
 import { useState } from "react";
 import {
-  View,
-  Text,
   Image,
-  TextInput,
-  TouchableOpacity,
   ScrollView,
   StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter, type Href } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import { useSignUp, useSSO } from "@clerk/expo";
-import { images } from "@/constants/images";
-import VerificationModal from "@/components/VerificationModal";
 
 export default function SignUpScreen() {
   const router = useRouter();
@@ -28,17 +28,28 @@ export default function SignUpScreen() {
 
   const handleSignUp = async () => {
     setFormError(null);
-    const { error } = await signUp.password({ emailAddress: email, password });
-    if (error) {
-      setFormError(error.longMessage ?? error.message);
-      return;
+    try {
+      const { error } = await signUp.password({
+        emailAddress: email,
+        password,
+      });
+      if (error) {
+        setFormError(error.longMessage ?? error.message);
+        return;
+      }
+      const { error: sendError } = await signUp.verifications.sendEmailCode();
+      if (sendError) {
+        setFormError(sendError.longMessage ?? sendError.message);
+        return;
+      }
+      setShowModal(true);
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "An error occurred during sign up. Please try again.";
+      setFormError(`handleSignUp: ${message}`);
     }
-    const { error: sendError } = await signUp.verifications.sendEmailCode();
-    if (sendError) {
-      setFormError(sendError.longMessage ?? sendError.message);
-      return;
-    }
-    setShowModal(true);
   };
 
   const handleVerify = async (code: string) => {
@@ -54,22 +65,46 @@ export default function SignUpScreen() {
           router.replace(url as Href);
         },
       });
+    } else {
+      // Handle non-complete states
+      console.warn(`Sign-up status after email verification: ${signUp.status}`);
+      throw new Error(
+        `Email verified, but additional verification is required (${signUp.status}). Please try again or contact support if this persists.`,
+      );
     }
   };
 
   const handleResend = async () => {
-    const { error } = await signUp.verifications.sendEmailCode();
-    if (error) {
-      throw new Error(error.longMessage ?? error.message);
+    try {
+      const { error } = await signUp.verifications.sendEmailCode();
+      if (error) {
+        throw new Error(error.longMessage ?? error.message);
+      }
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Failed to resend code. Please try again.";
+      throw new Error(`handleResend: ${message}`);
     }
   };
 
-  const handleSSOAuth = async (strategy: "oauth_google" | "oauth_facebook" | "oauth_apple") => {
+  const handleSSOAuth = async (
+    strategy: "oauth_google" | "oauth_facebook" | "oauth_apple",
+  ) => {
     setFormError(null);
-    const { createdSessionId, setActive } = await startSSOFlow({ strategy });
-    if (createdSessionId && setActive) {
-      await setActive({ session: createdSessionId });
-      router.replace("/");
+    try {
+      const { createdSessionId, setActive } = await startSSOFlow({ strategy });
+      if (createdSessionId && setActive) {
+        await setActive({ session: createdSessionId });
+        router.replace("/");
+      }
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Authentication failed. Please try again.";
+      setFormError(`handleSSOAuth: ${message}`);
     }
   };
 
@@ -123,9 +158,9 @@ export default function SignUpScreen() {
             placeholderTextColor="#9ca3af"
           />
         </View>
-        {errors.fields.emailAddress && (
+        {errors?.fields?.emailAddress && (
           <Text className="body-sm text-red-500 -mt-3 mb-3 px-1">
-            {errors.fields.emailAddress.message}
+            {errors?.fields?.emailAddress?.message}
           </Text>
         )}
 
@@ -153,9 +188,9 @@ export default function SignUpScreen() {
             />
           </TouchableOpacity>
         </View>
-        {errors.fields.password && (
+        {errors?.fields?.password && (
           <Text className="body-sm text-red-500 -mt-5 mb-3 px-1">
-            {errors.fields.password.message}
+            {errors?.fields?.password?.message}
           </Text>
         )}
 
@@ -171,7 +206,9 @@ export default function SignUpScreen() {
           activeOpacity={0.85}
           onPress={handleSignUp}
           disabled={!email || !password || isLoading}
-          style={(!email || !password || isLoading) ? { opacity: 0.6 } : undefined}
+          style={
+            !email || !password || isLoading ? { opacity: 0.6 } : undefined
+          }
         >
           <Text className="font-poppins-semibold text-[16px] leading-6 text-white">
             {isLoading ? "Creating account..." : "Sign Up"}

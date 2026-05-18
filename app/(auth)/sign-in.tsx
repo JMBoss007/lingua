@@ -1,19 +1,19 @@
+import VerificationModal from "@/components/VerificationModal";
+import { images } from "@/constants/images";
+import { useSignIn, useSSO } from "@clerk/expo";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter, type Href } from "expo-router";
 import { useState } from "react";
 import {
-  View,
-  Text,
   Image,
-  TextInput,
-  TouchableOpacity,
   ScrollView,
   StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter, type Href } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import { useSignIn, useSSO } from "@clerk/expo";
-import { images } from "@/constants/images";
-import VerificationModal from "@/components/VerificationModal";
 
 export default function SignInScreen() {
   const router = useRouter();
@@ -26,43 +26,95 @@ export default function SignInScreen() {
 
   const handleSignIn = async () => {
     setFormError(null);
-    const { error } = await signIn.emailCode.sendCode({ emailAddress: email });
-    if (error) {
-      setFormError(error.longMessage ?? error.message);
-      return;
+    try {
+      const { error } = await signIn.emailCode.sendCode({
+        emailAddress: email,
+      });
+      if (error) {
+        setFormError(error.longMessage ?? error.message);
+        return;
+      }
+      setShowModal(true);
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "An error occurred. Please try again.";
+      setFormError(message);
     }
-    setShowModal(true);
   };
 
   const handleVerify = async (code: string) => {
-    const { error } = await signIn.emailCode.verifyCode({ code });
-    if (error) {
-      throw new Error(error.longMessage ?? error.message);
-    }
-    if (signIn.status === "complete") {
-      await signIn.finalize({
-        navigate: ({ session, decorateUrl }) => {
-          if (session?.currentTask) return;
-          const url = decorateUrl("/");
-          router.replace(url as Href);
-        },
-      });
+    try {
+      const { error } = await signIn.emailCode.verifyCode({ code });
+      if (error) {
+        throw new Error(error.longMessage ?? error.message);
+      }
+
+      // Handle different sign-in states after code verification
+      switch (signIn.status) {
+        case "complete":
+          // Code verified successfully, finalize the session
+          await signIn.finalize({
+            navigate: ({ session, decorateUrl }) => {
+              if (session?.currentTask) return;
+              const url = decorateUrl("/");
+              router.replace(url as Href);
+            },
+          });
+          break;
+
+        case "needs_second_factor":
+          // MFA required - keep modal open and show appropriate message
+          throw new Error(
+            "Two-factor authentication required. Please check your authenticator or email for the second factor.",
+          );
+
+        default:
+          // Unexpected status - log and raise error to prevent silent failures
+          console.warn(`Unexpected sign-in status: ${signIn.status}`);
+          throw new Error(
+            `Authentication state not ready. Current state: ${signIn.status}. Please try again or contact support.`,
+          );
+      }
+    } catch (err) {
+      throw err instanceof Error
+        ? err
+        : new Error("Verification failed. Please try again.");
     }
   };
 
   const handleResend = async () => {
-    const { error } = await signIn.emailCode.sendCode({ emailAddress: email });
-    if (error) {
-      throw new Error(error.longMessage ?? error.message);
+    try {
+      const { error } = await signIn.emailCode.sendCode({
+        emailAddress: email,
+      });
+      if (error) {
+        throw new Error(error.longMessage ?? error.message);
+      }
+    } catch (err) {
+      throw err instanceof Error
+        ? err
+        : new Error("Failed to resend code. Please try again.");
     }
   };
 
-  const handleSSOAuth = async (strategy: "oauth_google" | "oauth_facebook" | "oauth_apple") => {
+  const handleSSOAuth = async (
+    strategy: "oauth_google" | "oauth_facebook" | "oauth_apple",
+  ) => {
     setFormError(null);
-    const { createdSessionId, setActive } = await startSSOFlow({ strategy });
-    if (createdSessionId && setActive) {
-      await setActive({ session: createdSessionId });
-      router.replace("/");
+    try {
+      const { createdSessionId, setActive } = await startSSOFlow({ strategy });
+      if (createdSessionId && setActive) {
+        await setActive({ session: createdSessionId });
+        router.replace("/");
+      }
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Authentication failed. Please try again.";
+      setFormError(message);
     }
   };
 
@@ -116,7 +168,7 @@ export default function SignInScreen() {
             placeholderTextColor="#9ca3af"
           />
         </View>
-        {errors.fields.identifier && (
+        {errors?.fields?.identifier?.message && (
           <Text className="body-sm text-red-500 -mt-5 mb-3 px-1">
             {errors.fields.identifier.message}
           </Text>
@@ -134,7 +186,7 @@ export default function SignInScreen() {
           activeOpacity={0.85}
           onPress={handleSignIn}
           disabled={!email || isLoading}
-          style={(!email || isLoading) ? { opacity: 0.6 } : undefined}
+          style={!email || isLoading ? { opacity: 0.6 } : undefined}
         >
           <Text className="font-poppins-semibold text-[16px] leading-6 text-white">
             {isLoading ? "Sending code..." : "Sign In"}

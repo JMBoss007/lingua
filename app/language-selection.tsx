@@ -36,7 +36,8 @@ export default function LanguageSelectionScreen() {
         <Text className="h3 text-ink flex-1 text-center">
           Choose a language
         </Text>
-        <View style={{ width: 38 }} />
+        {/* spacer to visually center the title */}
+        <View className="w-[38px]" />
       </View>
 
       {/* Search bar */}
@@ -54,7 +55,7 @@ export default function LanguageSelectionScreen() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.content}>
+        <View className="px-4">
           <Text className="h4 text-ink mb-3">Popular</Text>
 
           {popularLanguages.map((lang, index) => {
@@ -72,7 +73,7 @@ export default function LanguageSelectionScreen() {
                   !isSelected && !isLast ? styles.langRowDivider : null,
                 ]}
               >
-                <View style={styles.flagWrap}>
+                <View className="w-11 h-11 rounded-full overflow-hidden bg-[#f0f0f0]">
                   <Image
                     source={{ uri: lang.flag }}
                     style={styles.flagImg}
@@ -88,7 +89,7 @@ export default function LanguageSelectionScreen() {
                 </View>
 
                 {isSelected ? (
-                  <View style={styles.checkCircle}>
+                  <View className="w-[26px] h-[26px] rounded-full bg-primary items-center justify-center">
                     <Ionicons name="checkmark" size={14} color="#fff" />
                   </View>
                 ) : (
@@ -105,12 +106,12 @@ export default function LanguageSelectionScreen() {
             onPress={() => router.back()}
             disabled={!selectedId}
           >
-            <Text style={styles.confirmText}>Confirm</Text>
+            <Text className="btn-label text-white">Confirm</Text>
           </TouchableOpacity>
         </View>
 
         {/* Earth illustration — full-width, outside horizontal padding */}
-        <View style={styles.earthWrap}>
+        <View className="mt-6 overflow-hidden">
           <Image
             source={images.earth}
             style={styles.earthImg}
@@ -123,16 +124,19 @@ export default function LanguageSelectionScreen() {
 }
 
 const styles = StyleSheet.create({
+  // SafeAreaView — exempt (react-native-safe-area-context, className not supported)
   safe: {
     flex: 1,
     backgroundColor: "#ffffff",
   },
+  // TouchableOpacity — exempt per style exception rules
   backBtn: {
     width: 38,
     height: 38,
     alignItems: "center",
     justifyContent: "center",
   },
+  // TextInput — exempt per style exception rules
   searchInput: {
     flex: 1,
     paddingVertical: 14,
@@ -141,10 +145,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#001132",
   },
-  content: {
-    paddingHorizontal: 16,
-    paddingBottom: 0,
-  },
+  // TouchableOpacity — exempt (base + dynamic selection/divider states)
   langRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -163,43 +164,20 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#e5e7eb",
   },
-  flagWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    overflow: "hidden",
-    backgroundColor: "#f0f0f0",
-  },
+  // expo-image Image — 3rd-party component, keep style prop for safety
   flagImg: {
     width: 44,
     height: 44,
   },
-  checkCircle: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    backgroundColor: "#6c4ef5",
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  // TouchableOpacity — exempt
   confirmBtn: {
     backgroundColor: "#6c4ef5",
     borderRadius: 16,
     paddingVertical: 16,
     alignItems: "center",
     marginTop: 24,
-    marginBottom: 0,
   },
-  confirmText: {
-    fontFamily: "Poppins-SemiBold",
-    fontSize: 16,
-    color: "#ffffff",
-    lineHeight: 24,
-  },
-  earthWrap: {
-    marginTop: 24,
-    overflow: "hidden",
-  },
+  // expo-image Image — 3rd-party component, keep style prop for safety
   earthImg: {
     width: "100%",
     height: 200,
