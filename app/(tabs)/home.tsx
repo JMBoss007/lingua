@@ -83,7 +83,7 @@ export default function HomeScreen() {
     ? (DIFFICULTY_LEVEL[language.difficulty] ?? "A1")
     : "A1";
   const firstName = user?.firstName ?? user?.username ?? "there";
-  const xpProgress = dailyXpGoal > 0 ? dailyXpEarned / dailyXpGoal : 0;
+  const xpProgress = dailyXpGoal > 0 ? Math.min((dailyXpEarned / dailyXpGoal) * 100, 100) : 0;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#ffffff" }}>
