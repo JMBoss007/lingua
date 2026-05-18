@@ -6,6 +6,7 @@ import { useFonts } from "expo-font";
 import { ClerkProvider } from "@clerk/expo";
 import { tokenCache } from "@clerk/expo/token-cache";
 import * as WebBrowser from "expo-web-browser";
+import { PostHogProvider } from "posthog-react-native";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -36,8 +37,13 @@ export default function RootLayout() {
   }
 
   return (
-    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
-      <Stack screenOptions={{ headerShown: false }} />
-    </ClerkProvider>
+    <PostHogProvider
+      apiKey={process.env.EXPO_PUBLIC_POSTHOG_KEY!}
+      options={{ host: process.env.EXPO_PUBLIC_POSTHOG_HOST }}
+    >
+      <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+        <Stack screenOptions={{ headerShown: false }} />
+      </ClerkProvider>
+    </PostHogProvider>
   );
 }
