@@ -20,7 +20,11 @@
       "Bash(node -e \"const pkg = require\\('./node_modules/@clerk/expo/package.json'\\); console.log\\(JSON.stringify\\(Object.keys\\(pkg.exports\\), null, 2\\)\\)\")",
       "Bash(node -e \"const pkg = require\\('./node_modules/@clerk/expo/package.json'\\); console.log\\(JSON.stringify\\({main: pkg.main, 'react-native': pkg['react-native'], source: pkg.source, browser: pkg.browser, peerDependencies: pkg.peerDependencies}, null, 2\\)\\)\")",
       "Bash(Get-ChildItem -Path \"d:\\\\Projects\\\\react native projects\\\\mbd_performance\" -Force)",
-      "Bash(npx eslint *)"
+      "Bash(npx eslint *)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Sort-Object)",
+      "Bash(node -e \"const p = require\\('./package.json'\\); console.log\\('zustand:', p.dependencies.zustand\\); console.log\\('async-storage:', p.dependencies['@react-native-async-storage/async-storage']\\);\")",
+      "Bash(not exist *)"
     ]
   }
 }

@@ -13,9 +13,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { languages } from "@/data/languages";
 import { images } from "@/constants/images";
+import { useLanguageStore } from "@/store/useLanguageStore";
 
 export default function LanguageSelectionScreen() {
-  const [selectedId, setSelectedId] = useState<string>("spanish");
+  const { selectedLanguageId, setSelectedLanguage } = useLanguageStore();
+  const [selectedId, setSelectedId] = useState<string>(
+    selectedLanguageId ?? "spanish"
+  );
   const [search, setSearch] = useState("");
 
   const popularLanguages = languages
@@ -26,13 +30,17 @@ export default function LanguageSelectionScreen() {
     <SafeAreaView style={styles.safe}>
       {/* Header */}
       <View className="flex-row items-center px-4 pt-2 pb-4">
-        <TouchableOpacity
-          style={styles.backBtn}
-          onPress={() => router.back()}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="chevron-back" size={22} color="#001132" />
-        </TouchableOpacity>
+        {router.canGoBack() ? (
+          <TouchableOpacity
+            style={styles.backBtn}
+            onPress={() => router.back()}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="chevron-back" size={22} color="#001132" />
+          </TouchableOpacity>
+        ) : (
+          <View style={styles.backBtn} />
+        )}
         <Text className="h3 text-ink flex-1 text-center">
           Choose a language
         </Text>
@@ -103,7 +111,10 @@ export default function LanguageSelectionScreen() {
           <TouchableOpacity
             style={styles.confirmBtn}
             activeOpacity={0.85}
-            onPress={() => router.back()}
+            onPress={() => {
+              setSelectedLanguage(selectedId);
+              router.replace("/home");
+            }}
             disabled={!selectedId}
           >
             <Text className="btn-label text-white">Confirm</Text>
