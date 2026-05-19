@@ -1,21 +1,15 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Image as ExpoImage } from "expo-image";
-import { Ionicons } from "@expo/vector-icons";
-import { useUser } from "@clerk/expo";
+import { images } from "@/constants/images";
+import { languages } from "@/data/languages";
+import { getLessonsByUnit } from "@/data/lessons";
+import { getUnitsByLanguage } from "@/data/units";
 import { useLanguageStore } from "@/store/useLanguageStore";
 import { useProgressStore } from "@/store/useProgressStore";
-import { languages } from "@/data/languages";
-import { getUnitsByLanguage } from "@/data/units";
-import { getLessonsByUnit } from "@/data/lessons";
-import { images } from "@/constants/images";
 import type { LessonType } from "@/types/learning";
+import { useUser } from "@clerk/expo";
+import { Ionicons } from "@expo/vector-icons";
+import { Image as ExpoImage } from "expo-image";
+import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const LANGUAGE_GREETING: Record<string, string> = {
   spanish: "Hola",
@@ -83,7 +77,8 @@ export default function HomeScreen() {
     ? (DIFFICULTY_LEVEL[language.difficulty] ?? "A1")
     : "A1";
   const firstName = user?.firstName ?? user?.username ?? "there";
-  const xpProgress = dailyXpGoal > 0 ? dailyXpEarned / dailyXpGoal : 0;
+  const xpProgress =
+    dailyXpGoal > 0 ? Math.min(dailyXpEarned / dailyXpGoal, 1) : 0;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#ffffff" }}>
@@ -219,11 +214,7 @@ export default function HomeScreen() {
                         </View>
                         {isCompleted ? (
                           <View className="w-6 h-6 rounded-full bg-lingua-blue justify-center items-center">
-                            <Ionicons
-                              name="checkmark"
-                              size={14}
-                              color="#fff"
-                            />
+                            <Ionicons name="checkmark" size={14} color="#fff" />
                           </View>
                         ) : (
                           <View className="w-6 h-6 rounded-full border-2 border-border" />
