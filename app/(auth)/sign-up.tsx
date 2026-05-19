@@ -48,7 +48,7 @@ export default function SignUpScreen() {
         err instanceof Error
           ? err.message
           : "An error occurred during sign up. Please try again.";
-      setFormError(`handleSignUp: ${message}`);
+      setFormError(message);
     }
   };
 
@@ -85,7 +85,7 @@ export default function SignUpScreen() {
         err instanceof Error
           ? err.message
           : "Failed to resend code. Please try again.";
-      throw new Error(`handleResend: ${message}`);
+      throw new Error(message);
     }
   };
 
@@ -98,13 +98,21 @@ export default function SignUpScreen() {
       if (createdSessionId && setActive) {
         await setActive({ session: createdSessionId });
         router.replace("/");
+      } else if (createdSessionId && !setActive) {
+        // Session created but activation step is missing
+        setFormError(
+          "SSO initiated but session activation failed — please check your email or try signing in again.",
+        );
+      } else {
+        // Neither createdSessionId nor setActive provided
+        setFormError("SSO authentication did not complete. Please try again.");
       }
     } catch (err) {
       const message =
         err instanceof Error
           ? err.message
           : "Authentication failed. Please try again.";
-      setFormError(`handleSSOAuth: ${message}`);
+      setFormError(message);
     }
   };
 

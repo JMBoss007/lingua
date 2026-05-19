@@ -108,6 +108,9 @@ export default function SignInScreen() {
       if (createdSessionId && setActive) {
         await setActive({ session: createdSessionId });
         router.replace("/");
+      } else if (createdSessionId) {
+        // Session created but setActive unavailable - unexpected state
+        setFormError("Authentication incomplete. Please try again.");
       }
     } catch (err) {
       const message =
