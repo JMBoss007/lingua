@@ -9,14 +9,16 @@ export const units: Unit[] = [
     description: "Learn how to say hello, goodbye, and introduce yourself.",
     order: 1,
     icon: "👋",
+    bannerImage: "https://picsum.photos/seed/es-unit-1/800/400",
   },
   {
     id: "es-unit-2",
     languageId: "spanish",
     title: "Numbers & Colors",
-    description: "Count to ten and name common colors in Spanish.",
+    description: "Count to twenty and name common colors in Spanish.",
     order: 2,
     icon: "🔢",
+    bannerImage: "https://picsum.photos/seed/es-unit-2/800/400",
   },
 
   // French
@@ -27,14 +29,16 @@ export const units: Unit[] = [
     description: "Learn how to say hello, goodbye, and introduce yourself.",
     order: 1,
     icon: "👋",
+    bannerImage: "https://picsum.photos/seed/fr-unit-1/800/400",
   },
   {
     id: "fr-unit-2",
     languageId: "french",
     title: "Numbers & Colors",
-    description: "Count to ten and name common colors in French.",
+    description: "Count to twenty and name common colors in French.",
     order: 2,
     icon: "🔢",
+    bannerImage: "https://picsum.photos/seed/fr-unit-2/800/400",
   },
 
   // Japanese
@@ -45,14 +49,16 @@ export const units: Unit[] = [
     description: "Learn essential Japanese greetings and polite expressions.",
     order: 1,
     icon: "👋",
+    bannerImage: "https://picsum.photos/seed/ja-unit-1/800/400",
   },
   {
     id: "ja-unit-2",
     languageId: "japanese",
-    title: "Numbers",
-    description: "Learn to count from one to ten in Japanese.",
+    title: "Numbers & Colors",
+    description: "Learn to count and name colors in Japanese.",
     order: 2,
     icon: "🔢",
+    bannerImage: "https://picsum.photos/seed/ja-unit-2/800/400",
   },
 ];
 

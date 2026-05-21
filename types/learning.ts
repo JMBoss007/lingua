@@ -24,6 +24,7 @@ export type Unit = {
   description: string;
   order: number;
   icon: string;
+  bannerImage?: string;
 };
 
 export type LessonType = "vocabulary" | "phrase" | "audio" | "chat";
@@ -84,4 +85,5 @@ export type Lesson = {
   aiTeacherPrompt?: string;
   vocabulary?: VocabItem[];
   activities: Activity[];
+  image?: string;
 };
