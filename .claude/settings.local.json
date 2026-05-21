@@ -24,7 +24,13 @@
       "Bash(Select-Object -ExpandProperty FullName)",
       "Bash(Sort-Object)",
       "Bash(node -e \"const p = require\\('./package.json'\\); console.log\\('zustand:', p.dependencies.zustand\\); console.log\\('async-storage:', p.dependencies['@react-native-async-storage/async-storage']\\);\")",
-      "Bash(not exist *)"
+      "Bash(not exist *)",
+      "Bash(Get-ChildItem -Path \"d:\\\\Projects\\\\react native projects\\\\mbd_performance\" -Recurse -Force)",
+      "Bash(Select-Object FullName)",
+      "Bash(ConvertTo-Csv -NoTypeInformation)",
+      "Bash(Out-String)",
+      "Bash(grep -E \"\\\\.\\(ts|tsx|js|json|css\\)$\")",
+      "Bash(grep -E \"\\\\.\\(tsx?|jsx?|json|css|ttf\\)$\")"
     ]
   }
 }

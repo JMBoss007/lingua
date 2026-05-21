@@ -13,6 +13,8 @@ WebBrowser.maybeCompleteAuthSession();
 SplashScreen.preventAutoHideAsync();
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
+const posthogKey = process.env.EXPO_PUBLIC_POSTHOG_KEY!;
+const posthogHost = process.env.EXPO_PUBLIC_POSTHOG_HOST!;
 
 if (!publishableKey) {
   throw new Error("Add your Clerk Publishable Key to the .env file");

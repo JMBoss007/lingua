@@ -30,7 +30,11 @@ export const useProgressStore = create<ProgressState>()(
       dailyXpEarned: 15,
       dailyXpGoal: 20,
       streakDays: 12,
-      completedLessonIds: [],
+      completedLessonIds: [
+        "es-u1-l1", "es-u1-l2",
+        "fr-u1-l1", "fr-u1-l2",
+        "ja-u1-l1", "ja-u1-l2",
+      ],
       lastResetDate: getLocalDateString(),
       hasHydrated: false,
       addXp: (amount) =>
